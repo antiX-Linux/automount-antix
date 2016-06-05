@@ -1,0 +1,168 @@
+#!/bin/bash
+
+#automount-configuration script for auto-mount in desktop-session startup file
+
+
+# translations stuff
+TEXTDOMAINDIR=/usr/share/locale 
+TEXTDOMAIN=automount-config
+
+# translation text as variables 
+APPLY=$"Apply"
+CLOSE=$"Close"
+TITLE=$"Automount Configuration"
+USBDEVICES=$"usb devices"
+OPTICALDEVICES=$"optical discs"
+LABEL1=$"Automount External Devices"
+LABEL2=$"Open Default File Manager on Mount"
+DVDDEVICE=$"DVD in Video Player"
+AUDIODISC=$"Audio Discs in Music Player"
+DVDCOMMANDLABEL=$"DVD Command"
+AUDIODISCCOMMANDLABEL=$"Audio Disc Command"
+
+get_selections()
+{
+AUTOMOUNT=$(grep automount= /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+FM_USB=$(grep fm_usb /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+FM_OPTICAL=$(grep fm_optical /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+VP_DVD=$(grep vp_dvd /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+DVD_COMMAND=$(grep dvd_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+MP_AUDIO=$(grep mp_audio /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+AUDIO_COMMAND=$(grep audio_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+
+#devmon --exec-on-drive "desktop-defaults-run -fm %d" --exec-on-disc "desktop-defaults-run -fm %d" & 
+
+#set up selection gui
+
+selections=$(yad --form --title="$TITLE" --center --window-icon=drive-removable-media --button="$APPLY"!emblem-default!:0 --button="$CLOSE"!process-stop!:1 --width=450\
+	--field="$LABEL1":CHK "$AUTOMOUNT"\
+	--field="":LBL ""\
+	--field="$LABEL2":LBL ""\
+	--field="	$USBDEVICES":CHK "$FM_USB"\
+	--field="	$OPTICALDEVICES":CHK "$FM_OPTICAL"\
+	--field="	$DVDDEVICE":CHK "$VP_DVD"\
+	--field="   $DVDCOMMANDLABEL": "$DVD_COMMAND"\
+	--field="	$AUDIODISC":CHK "$MP_AUDIO"\
+	--field="   $AUDIODISCCOMMANDLABEL": "$AUDIO_COMMAND"\
+	--field="%f = device (/dev/XXX), %d = mountpoint (/media/XXX)":LBL)
+}
+
+actions()
+{
+
+#capture the exit code from the selection dialog
+status2=$?
+
+#echo $status2
+
+#decide what to do, based on exit code
+case $status2 in
+
+	0) adjust_settings
+		   ;;
+	1) quit
+		   ;;
+esac
+}
+
+adjust_settings()
+{
+# kill existing devmon running by the user
+
+pkill -x -u $USER devmon
+echo $selections
+
+# get the new settings
+AUTOMOUNT=$(echo $selections|cut -d '|' -f1)
+FM_USB=$(echo $selections|cut -d '|' -f4)
+FM_OPTICAL=$(echo $selections|cut -d '|' -f5)
+VP_DVD=$(echo $selections|cut -d '|' -f6)
+DVD_COMMAND=$(echo $selections|cut -d '|' -f7)
+MP_AUDIO=$(echo $selections|cut -d '|' -f8)
+AUDIO_COMMAND=$(echo $selections|cut -d '|' -f9)
+
+
+#terminal output for new settings
+echo automount is :$AUTOMOUNT
+echo FM_USB is : $FM_USB
+echo FM_OPTICAL is: $FM_OPTICAL
+echo VP_DVD is : $VP_DVD
+echo DVD_COMMAND is : $DVD_COMMAND
+echo MP_AUDIO is : $MP_AUDIO
+echo AUDIO_COMMAND is : $AUDIO_COMMAND
+
+#modify the autostart.conf file
+#automount
+if [ "$AUTOMOUNT" = "TRUE" ]; then
+sed -i s/automount=.*/automount=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/automount=.*/automount=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
+#pop open default filemanager for usb device mount
+if [ "$FM_USB" = "TRUE" ]; then
+sed -i s/fm_usb=.*/fm_usb=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/fm_usb=.*/fm_usb=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
+#pop open default filemanager for optical disc mount
+if [ "$FM_OPTICAL" = "TRUE" ]; then
+sed -i s/fm_optical=.*/fm_optical=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/fm_optical=.*/fm_optical=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
+#use command to play dvd disc on insert
+if [ "$VP_DVD" = "TRUE" ]; then
+sed -i s/vp_dvd=.*/vp_dvd=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/vp_dvd=.*/vp_dvd=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
+#use command to play audio disc on insert
+if [ "$MP_AUDIO" = "TRUE" ]; then
+sed -i s/mp_audio=.*/mp_audio=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/mp_audio=.*/mp_audio=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
+# set dvd disk player commands
+sed -i /dvd_command=.*/d /home/$USER/.desktop-session/automount.conf
+echo dvd_command=$DVD_COMMAND >>/home/$USER/.desktop-session/automount.conf
+
+#set the audio player command 
+sed -i /audio_command=.*/d /home/$USER/.desktop-session/automount.conf
+echo audio_command=$AUDIO_COMMAND >>/home/$USER/.desktop-session/automount.conf
+
+#restart automount-antix
+bash -c automount-antix &
+
+pkill -HUP conky
+#tell the gui to loop
+actionstatus=0
+}
+
+quit()
+{
+	actionstatus=1
+}
+
+##start gui and run actions
+## this is actually gets things started.  everything up to now is definition of functions and variables
+
+# set initial status
+status=0
+
+while [ $status = "0" ]; do
+
+	#start the parent dialog
+	get_selections
+	
+	#once selection is made, use action function to decide what to do
+	actions
+
+	#app status is the same as whatever the last actionstatus is.  If 0, the while loop starts everything over
+	status=$actionstatus
+	
+done

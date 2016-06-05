@@ -1,0 +1,62 @@
+#!/bin/bash
+
+#automount script for desktop-session startup file
+#also called by automount-config when enabling automounting
+#
+
+automount()
+{
+AUTOMOUNT=$(grep automount= /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+FM_USB=$(grep usb /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+FM_OPTICAL=$(grep optical /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+VP_DVD=$(grep vp_dvd /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+DVD_COMMAND=$(grep dvd_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+MP_AUDIO=$(grep mp_audio /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+AUDIO_COMMAND=$(grep audio_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+
+echo automount is :$AUTOMOUNT
+echo FM_USB is : $FM_USB
+echo FM_OPTICAL is: $FM_OPTICAL
+echo VP_DVD is : $VP_DVD
+echo DVD_COMMAND is : $DVD_COMMAND
+echo MP_AUDIO is : $MP_AUDIO
+echo AUDIO_COMMAND is : $AUDIO_COMMAND
+
+if [ "$FM_USB" = "TRUE" ]; then
+OPTION_USB='--exec-on-drive "desktop-defaults-run -fm %d"'
+fi
+
+if [ "$FM_OPTICAL" = "TRUE" ]; then
+OPTION_OPTICAL='--exec-on-disc "desktop-defaults-run -fm %d"'
+fi
+
+if [ "$VP_DVD" = "TRUE" ]; then
+if [ "$DVD_COMMAND" = "" ]; then
+	OPTION_DVD=""
+	else
+	OPTION_DVD="--exec-on-video '$DVD_COMMAND'" 
+	fi 
+fi
+
+if [ "$MP_AUDIO" = "TRUE" ]; then
+	if [ "$AUDIO_COMMAND" = "" ]; then
+	OPTION_AUDIO=""
+	else
+	OPTION_AUDIO="--exec-on-audio '$AUDIO_COMMAND'" 
+	fi
+fi
+
+if [ "$AUTOMOUNT" = "TRUE" ]; then
+COMMAND="devmon $OPTION_USB $OPTION_OPTICAL $OPTION_DVD $OPTION_AUDIO >/dev/null &"
+bash -c "$COMMAND"
+fi
+}
+
+#kill any previous devmon running
+pkill -x -u $USER devmon
+
+automount
+
+exit 0
+
+ 
