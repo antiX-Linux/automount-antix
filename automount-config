@@ -5,7 +5,7 @@
 
 # translations stuff
 TEXTDOMAINDIR=/usr/share/locale 
-TEXTDOMAIN=automount-config
+TEXTDOMAIN=automount-antix
 
 # translation text as variables 
 APPLY=$"Apply"
@@ -41,9 +41,9 @@ selections=$(yad --form --title="$TITLE" --center --window-icon=drive-removable-
 	--field="	$USBDEVICES":CHK "$FM_USB"\
 	--field="	$OPTICALDEVICES":CHK "$FM_OPTICAL"\
 	--field="	$DVDDEVICE":CHK "$VP_DVD"\
-	--field="   $DVDCOMMANDLABEL": "$DVD_COMMAND"\
+	--field="              $DVDCOMMANDLABEL": "$DVD_COMMAND"\
 	--field="	$AUDIODISC":CHK "$MP_AUDIO"\
-	--field="   $AUDIODISCCOMMANDLABEL": "$AUDIO_COMMAND"\
+	--field="              $AUDIODISCCOMMANDLABEL": "$AUDIO_COMMAND"\
 	--field="%f = device (/dev/XXX), %d = mountpoint (/media/XXX)":LBL)
 }
 
@@ -62,6 +62,8 @@ case $status2 in
 		   ;;
 	1) quit
 		   ;;
+	252) quit
+			;;
 esac
 }
 
@@ -138,7 +140,6 @@ echo audio_command=$AUDIO_COMMAND >>/home/$USER/.desktop-session/automount.conf
 #restart automount-antix
 bash -c automount-antix &
 
-pkill -HUP conky
 #tell the gui to loop
 actionstatus=0
 }
