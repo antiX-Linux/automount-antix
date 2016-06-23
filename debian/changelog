@@ -1,3 +1,9 @@
+automount-antix (0.1.2) unstable; urgency=medium
+
+  * automount-antix fixes for device names with spaces 
+
+ -- anticapitalista <antix@operamail.com>  Wed, 15 Jun 2016 16:33:59 +0300
+
 automount-antix (0.1.1) unstable; urgency=medium
 
   * Added Catalan 
