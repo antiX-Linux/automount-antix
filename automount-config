@@ -4,21 +4,23 @@
 
 
 # translations stuff
-TEXTDOMAINDIR=/usr/share/locale 
+TEXTDOMAINDIR=/usr/share/locale
 TEXTDOMAIN=automount-antix
 
-# translation text as variables 
+# translation text as variables
 APPLY=$"Apply"
 CLOSE=$"Close"
 TITLE=$"Automount Configuration"
 USBDEVICES=$"usb devices"
 OPTICALDEVICES=$"optical discs"
 LABEL1=$"Automount External Devices"
+LABEL1a=$"\n    (note: takes up to 60secs for conky to reflect a change made here)"
 LABEL2=$"Open Default File Manager on Mount"
-DVDDEVICE=$"DVD in Video Player"
-AUDIODISC=$"Audio Discs in Music Player"
-DVDCOMMANDLABEL=$"DVD Command"
-AUDIODISCCOMMANDLABEL=$"Audio Disc Command"
+LABEL2a=$"spacefm/udevil has its own, independent, automount setting:\n      spacefm toolbar  --}  Devices  --}  Settings  --}  Auto Mount\nTo prevent automount from being performed by spacefm, you must ALSO specify disable via the spacefm GUI."
+DVDDEVICE=$"auto-launch preferred Video Player upon DVD insertion"
+AUDIODISC=$"auto-launch preferred Music Player upon insertion of Audio Disc"
+DVDCOMMANDLABEL=$"    DVD Command"
+AUDIODISCCOMMANDLABEL=$"    Audio Disc Command"
 
 get_selections()
 {
@@ -30,21 +32,22 @@ DVD_COMMAND=$(grep dvd_command /home/$USER/.desktop-session/automount.conf|cut -
 MP_AUDIO=$(grep mp_audio /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 AUDIO_COMMAND=$(grep audio_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 
-#devmon --exec-on-drive "desktop-defaults-run -fm %d" --exec-on-disc "desktop-defaults-run -fm %d" & 
+#devmon --exec-on-drive "desktop-defaults-run -fm %d" --exec-on-disc "desktop-defaults-run -fm %d" &
 
 #set up selection gui
 
-selections=$(yad --form --title="$TITLE" --center --window-icon=drive-removable-media --button="$APPLY"!emblem-default!:0 --button="$CLOSE"!process-stop!:1 --width=450\
-	--field="$LABEL1":CHK "$AUTOMOUNT"\
-	--field="":LBL ""\
-	--field="$LABEL2":LBL ""\
-	--field="	$USBDEVICES":CHK "$FM_USB"\
-	--field="	$OPTICALDEVICES":CHK "$FM_OPTICAL"\
-	--field="	$DVDDEVICE":CHK "$VP_DVD"\
-	--field="              $DVDCOMMANDLABEL": "$DVD_COMMAND"\
-	--field="	$AUDIODISC":CHK "$MP_AUDIO"\
-	--field="              $AUDIODISCCOMMANDLABEL": "$AUDIO_COMMAND"\
-	--field="%f = device (/dev/XXX), %d = mountpoint (/media/XXX)":LBL)
+selections=$(yad --form --title="$TITLE" --center --window-icon=drive-removable-media --button="$APPLY"!emblem-default!:0 --button="$CLOSE"!process-stop!:1 --width=690\
+    --field="$LABEL1 $LABEL1a":CHK "$AUTOMOUNT"\
+    --field="$LABEL2a":LBL ""\
+    --field="":LBL ""\
+    --field="$LABEL2":LBL ""\
+    --field=" $USBDEVICES":CHK "$FM_USB"\
+    --field=" $OPTICALDEVICES":CHK "$FM_OPTICAL"\
+    --field=" $DVDDEVICE":CHK "$VP_DVD"\
+    --field="       $DVDCOMMANDLABEL": "$DVD_COMMAND"\
+    --field=" $AUDIODISC":CHK "$MP_AUDIO"\
+    --field="       $AUDIODISCCOMMANDLABEL": "$AUDIO_COMMAND"\
+    --field="%f = device (/dev/XXX), %d = mountpoint (/media/XXX)":LBL)
 }
 
 actions()
@@ -58,12 +61,12 @@ status2=$?
 #decide what to do, based on exit code
 case $status2 in
 
-	0) adjust_settings
-		   ;;
-	1) quit
-		   ;;
-	252) quit
-			;;
+    0) adjust_settings
+           ;;
+    1) quit
+           ;;
+    252) quit
+            ;;
 esac
 }
 
@@ -133,7 +136,7 @@ fi
 sed -i /dvd_command=.*/d /home/$USER/.desktop-session/automount.conf
 echo dvd_command=$DVD_COMMAND >>/home/$USER/.desktop-session/automount.conf
 
-#set the audio player command 
+#set the audio player command
 sed -i /audio_command=.*/d /home/$USER/.desktop-session/automount.conf
 echo audio_command=$AUDIO_COMMAND >>/home/$USER/.desktop-session/automount.conf
 
@@ -146,7 +149,7 @@ actionstatus=0
 
 quit()
 {
-	actionstatus=1
+    actionstatus=1
 }
 
 ##start gui and run actions
@@ -157,13 +160,13 @@ status=0
 
 while [ $status = "0" ]; do
 
-	#start the parent dialog
-	get_selections
-	
-	#once selection is made, use action function to decide what to do
-	actions
+    #start the parent dialog
+    get_selections
 
-	#app status is the same as whatever the last actionstatus is.  If 0, the while loop starts everything over
-	status=$actionstatus
-	
+    #once selection is made, use action function to decide what to do
+    actions
+
+    #app status is the same as whatever the last actionstatus is.  If 0, the while loop starts everything over
+    status=$actionstatus
+
 done
