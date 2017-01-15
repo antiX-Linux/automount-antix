@@ -79,12 +79,12 @@ echo $selections
 
 # get the new settings
 AUTOMOUNT=$(echo $selections|cut -d '|' -f1)
-FM_USB=$(echo $selections|cut -d '|' -f4)
-FM_OPTICAL=$(echo $selections|cut -d '|' -f5)
-VP_DVD=$(echo $selections|cut -d '|' -f6)
-DVD_COMMAND=$(echo $selections|cut -d '|' -f7)
-MP_AUDIO=$(echo $selections|cut -d '|' -f8)
-AUDIO_COMMAND=$(echo $selections|cut -d '|' -f9)
+FM_USB=$(echo $selections|cut -d '|' -f5)
+FM_OPTICAL=$(echo $selections|cut -d '|' -f6)
+VP_DVD=$(echo $selections|cut -d '|' -f7)
+DVD_COMMAND=$(echo $selections|cut -d '|' -f8)
+MP_AUDIO=$(echo $selections|cut -d '|' -f9)
+AUDIO_COMMAND=$(echo $selections|cut -d '|' -f10)
 
 
 #terminal output for new settings
