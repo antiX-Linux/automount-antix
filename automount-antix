@@ -23,13 +23,11 @@ echo MP_AUDIO is : $MP_AUDIO
 echo AUDIO_COMMAND is : $AUDIO_COMMAND
 
 if [ "$FM_USB" = "TRUE" ]; then
-OPTION_USB=$(echo --exec-on-drive \'desktop-defaults-run -fm \"%d\"\')
-echo $OPTION_USB
+OPTION_USB='--exec-on-drive "desktop-defaults-run -fm %d"'
 fi
 
 if [ "$FM_OPTICAL" = "TRUE" ]; then
-OPTION_OPTICAL=$(echo --exec-on-disc \'desktop-defaults-run -fm \"%d\"\')
-echo $OPTION_OPTICAL
+OPTION_OPTICAL='--exec-on-disc "desktop-defaults-run -fm %d"'
 fi
 
 if [ "$VP_DVD" = "TRUE" ]; then
@@ -49,9 +47,8 @@ if [ "$MP_AUDIO" = "TRUE" ]; then
 fi
 
 if [ "$AUTOMOUNT" = "TRUE" ]; then
-COMMAND="devmon $OPTION_USB $OPTION_OPTICAL $OPTION_DVD $OPTION_AUDIO --no-unmount>/dev/null &"
+COMMAND="devmon $OPTION_USB $OPTION_OPTICAL $OPTION_DVD $OPTION_AUDIO >/dev/null &"
 bash -c "$COMMAND"
-#echo $COMMAND
 fi
 }
 

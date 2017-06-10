@@ -14,9 +14,9 @@ TITLE=$"Automount Configuration"
 USBDEVICES=$"usb devices"
 OPTICALDEVICES=$"optical discs"
 LABEL1=$"Automount External Devices"
-LABEL1a=$"\n    (note: takes up to 60secs for conky to reflect a change made here)"
+LABEL1a=$"\n"
 LABEL2=$"Open Default File Manager on Mount"
-LABEL2a=$"spacefm/udevil has its own, independent, automount setting:\n      spacefm toolbar  --}  Devices  --}  Settings  --}  Auto Mount\nTo prevent automount from being performed by spacefm, you must ALSO specify disable via the spacefm GUI."
+LABEL2a=$"Do Not Change Spacefm automount settings"
 DVDDEVICE=$"auto-launch preferred Video Player upon DVD insertion"
 AUDIODISC=$"auto-launch preferred Music Player upon insertion of Audio Disc"
 DVDCOMMANDLABEL=$"    DVD Command"
@@ -31,14 +31,15 @@ VP_DVD=$(grep vp_dvd /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 DVD_COMMAND=$(grep dvd_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 MP_AUDIO=$(grep mp_audio /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 AUDIO_COMMAND=$(grep audio_command /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
+SPACEFM_OVERRIDE=$(grep SPACEFM_OVERRIDE /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
 
 #devmon --exec-on-drive "desktop-defaults-run -fm %d" --exec-on-disc "desktop-defaults-run -fm %d" &
 
 #set up selection gui
 
 selections=$(yad --form --title="$TITLE" --center --window-icon=drive-removable-media --button="$APPLY"!emblem-default!:0 --button="$CLOSE"!process-stop!:1 --width=690\
-    --field="$LABEL1 $LABEL1a":CHK "$AUTOMOUNT"\
-    --field="$LABEL2a":LBL ""\
+    --field="$LABEL1":CHK "$AUTOMOUNT"\
+    --field="$LABEL2a":CHK "$SPACEFM_OVERRIDE"\
     --field="":LBL ""\
     --field="$LABEL2":LBL ""\
     --field=" $USBDEVICES":CHK "$FM_USB"\
@@ -85,6 +86,7 @@ VP_DVD=$(echo $selections|cut -d '|' -f7)
 DVD_COMMAND=$(echo $selections|cut -d '|' -f8)
 MP_AUDIO=$(echo $selections|cut -d '|' -f9)
 AUDIO_COMMAND=$(echo $selections|cut -d '|' -f10)
+SPACEFM_OVERRIDE=$(echo $selections|cut -d '|' -f2)
 
 
 #terminal output for new settings
@@ -95,13 +97,36 @@ echo VP_DVD is : $VP_DVD
 echo DVD_COMMAND is : $DVD_COMMAND
 echo MP_AUDIO is : $MP_AUDIO
 echo AUDIO_COMMAND is : $AUDIO_COMMAND
+echo SPACEFM_OVERRIDE is : $SPACEFM_OVERRIDE
 
 #modify the autostart.conf file
+
+#spacefm mount override
+if [ "$SPACEFM_OVERRIDE" = "TRUE" ] ; then
+sed -i s/SPACEFM_OVERRIDE=.*/SPACEFM_OVERRIDE=TRUE/ /home/$USER/.desktop-session/automount.conf
+else
+sed -i s/SPACEFM_OVERRIDE=.*/SPACEFM_OVERRIDE=FALSE/ /home/$USER/.desktop-session/automount.conf
+fi
+
 #automount
 if [ "$AUTOMOUNT" = "TRUE" ]; then
-sed -i s/automount=.*/automount=TRUE/ /home/$USER/.desktop-session/automount.conf
+    sed -i s/automount=.*/automount=TRUE/ /home/$USER/.desktop-session/automount.conf
+    if [ "$SPACEFM_OVERRIDE" = "FALSE" ]; then
+        if [ -e /home/$USER/.config/spacefm/session ]; then
+                pkill spacefm
+                sed -i s/dev_automount_optical-b=.*/dev_automount_optical-b=1/ /home/$USER/.config/spacefm/session
+                sed -i s/dev_automount_removable-b=.*/dev_automount_removable-b=1/ /home/$USER/.config/spacefm/session
+         fi
+    fi
 else
-sed -i s/automount=.*/automount=FALSE/ /home/$USER/.desktop-session/automount.conf
+    sed -i s/automount=.*/automount=FALSE/ /home/$USER/.desktop-session/automount.conf
+    if [ "$SPACEFM_OVERRIDE" = "FALSE" ]; then
+        if [ -e /home/$USER/.config/spacefm/session ]; then
+                pkill spacefm
+                sed -i s/dev_automount_optical-b=.*/dev_automount_optical-b=0/ /home/$USER/.config/spacefm/session
+                sed -i s/dev_automount_removable-b=.*/dev_automount_removable-b=0/ /home/$USER/.config/spacefm/session
+        fi
+    fi
 fi
 
 #pop open default filemanager for usb device mount
@@ -140,7 +165,15 @@ echo dvd_command=$DVD_COMMAND >>/home/$USER/.desktop-session/automount.conf
 sed -i /audio_command=.*/d /home/$USER/.desktop-session/automount.conf
 echo audio_command=$AUDIO_COMMAND >>/home/$USER/.desktop-session/automount.conf
 
-#restart automount-antix
+#kill conky if running, then restart desktop-session which will also restart conky
+if [ $(pidof conky) ]; then
+    pkill conky
+fi
+/usr/local/lib/desktop-session/desktop-session-restart &
+#let things settle down before bringing back the selection dialog
+sleep 5 
+
+#restart automount-antix in case disabled in startup files
 bash -c automount-antix &
 
 #tell the gui to loop
@@ -154,6 +187,12 @@ quit()
 
 ##start gui and run actions
 ## this is actually gets things started.  everything up to now is definition of functions and variables
+
+#update config file with new spacefm override setting, if necessary
+if [ "$(grep SPACEFM_OVERRIDE /home/$USER/.desktop-session/automount.conf)" = "" ]; then
+    echo "SPACEFM_OVERRIDE=FALSE">>/home/$USER/.desktop-session/automount.conf
+fi
+
 
 # set initial status
 status=0
