@@ -23,11 +23,13 @@ echo MP_AUDIO is : $MP_AUDIO
 echo AUDIO_COMMAND is : $AUDIO_COMMAND
 
 if [ "$FM_USB" = "TRUE" ]; then
-OPTION_USB='--exec-on-drive "desktop-defaults-run -fm %d"'
+OPTION_USB="--exec-on-drive 'desktop-defaults-run -fm \"%d\"'"
+echo OPTION_USB is $OPTION_USB
 fi
 
 if [ "$FM_OPTICAL" = "TRUE" ]; then
-OPTION_OPTICAL='--exec-on-disc "desktop-defaults-run -fm %d"'
+OPTION_OPTICAL="--exec-on-disc 'desktop-defaults-run -fm \"%d\"'"
+echo OPTION_OPTICAL is $OPTION_OPTICAL
 fi
 
 if [ "$VP_DVD" = "TRUE" ]; then

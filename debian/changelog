@@ -1,3 +1,9 @@
+automount-antix (0.1.7) unstable; urgency=medium
+
+  * modified automount script to handle disks and discs with spaces in name - d_o
+
+ -- anticapitalista <antix@operamail.com>  Sat, 17 Jun 2017 18:36:22 +0300
+
 automount-antix (0.1.6) unstable; urgency=medium
 
   * Many upstream changes - thanks to dolphin_oracle
