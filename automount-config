@@ -22,6 +22,9 @@ AUDIODISC=$"auto-launch preferred Music Player upon insertion of Audio Disc"
 DVDCOMMANDLABEL=$"    DVD Command"
 AUDIODISCCOMMANDLABEL=$"    Audio Disc Command"
 
+#make sure automount.conf ends with a new line
+sed -i -e '$a\' /home/$USER/.desktop-session/automount.conf
+
 get_selections()
 {
 AUTOMOUNT=$(grep automount= /home/$USER/.desktop-session/automount.conf|cut -d= -f2)
