@@ -2,3 +2,4 @@ automount-antix 	usr/local/bin
 automount-config 	usr/local/bin
 automount.conf 		etc/skel/.desktop-session
 locale/* 		usr/share/locale
+automount.desktop 	usr/share/applications/antix 

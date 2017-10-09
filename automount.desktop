@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Configure automount
+Comment=Configure automount
+Exec=automount-config
+Icon=mountbox
+Terminal=false
+Type=Application
+Categories=Settings;
+NoDisplay=False

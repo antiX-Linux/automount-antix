@@ -1,3 +1,9 @@
+automount-antix (0.1.9) unstable; urgency=medium
+
+  * Show in Applications menu
+
+ -- anticapitalista <antix@operamail.com>  Sun, 08 Oct 2017 00:25:01 +0300
+
 automount-antix (0.1.8) unstable; urgency=medium
 
   * make sure automount.conf ends in new line
