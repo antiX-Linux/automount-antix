@@ -1,3 +1,15 @@
+automount-antix (0.1.11) unstable; urgency=medium
+
+  * New and improved translations
+
+ -- anticapitalista <antix@operamail.com>  Fri, 02 Mar 2018 17:17:27 +0200
+
+automount-antix (0.1.10) unstable; urgency=medium
+
+  * Updated translations
+
+ -- anticapitalista <antix@operamail.com>  Tue, 14 Nov 2017 14:23:12 +0200
+
 automount-antix (0.1.9) unstable; urgency=medium
 
   * Show in Applications menu

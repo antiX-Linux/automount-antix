@@ -1,7 +1,27 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Configure automount
+Name[am]=በራሱ መጫኛ ማሰናጃ
+Name[ca]=Configura l'automuntatge
+Name[de]=Automount-Konfiguration
+Name[el]=Ρύθμιση automount
+Name[es]=Configurar automontar
+Name[fr]=Configurer le montage automatique
+Name[it]=Configura il montaggio automatico
+Name[nl]=Configureer automatisch aankoppelen
+Name[pt]=Montagem automática
+Name[sv]=Konfigurera automount
 Comment=Configure automount
+Comment[am]=በራሱ መጫኛ ማሰናጃ
+Comment[ca]=Configura l'automuntatge
+Comment[de]=Automount konfigurieren
+Comment[el]=Ρύθμιση automount
+Comment[es]=Configurar automontar
+Comment[fr]=Configure le montage automatique
+Comment[it]=Configura il montaggio automatico
+Comment[nl]=Configureer automatisch aankoppelen
+Comment[pt]=Configuração da montagem automática de dispositivos
+Comment[sv]=Konfigurera automount
 Exec=automount-config
 Icon=mountbox
 Terminal=false
